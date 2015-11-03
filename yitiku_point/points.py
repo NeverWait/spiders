@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 import urllib
 import json
-import collections
 from bs4 import BeautifulSoup
 import sys
 reload(sys)
@@ -32,12 +31,15 @@ sys.setdefaultencoding("utf-8")
 # </ul>
 # 二 写入的json格式
 # dd = {
-#     '1': {
-#         '主知识点': '多项式',
-#         2: {
-#             '一级子知识点名称': '一元多项式',
-#             3: {
-#                 '二级子知识点名称': '一元多项式求解'
+#     主知识点名称: {
+#         主知识点编号: '111',
+#          '权重'：0.0,
+#          一级子知识点名称: {
+#             '一级子知识点编号': '222',
+#              '权重'：0.0
+#             二级子知识点名称: {
+#                 '二级子知识点编号': '333'
+#                 '权重'：0.0
 #             }
 #         }
 #     }
@@ -58,7 +60,7 @@ url_root = soup.find(id="root")  # 取出包含所有知识点的ul标签
 li_list = url_root.find_all('li', recursive=False)  # 求出ul下的一级li标签的个数
 root_len = len(li_list)
 
-
+num = 0
 point_dict = {}
 # f = open('point.txt', 'w+')
 for i in range(root_len):
@@ -67,8 +69,9 @@ for i in range(root_len):
     main_point_id = point_li.label['bgid']  # 主知识点编号
 
     # f.write('0' + ' ' + main_point_id + ' ' + main_point + '\n')  # 写入主知识点信息
-    point_dict[main_point_id] = {'主知识点名称': main_point}
-
+    # point_dict[main_point_id] = {'主知识点名称': main_point}
+    point_dict[main_point] = {'主知识点编号': main_point_id}
+    point_dict[main_point]['权重'] = 0.0
     child_ul_li = point_li.ul.find_all('li', recursive=False)  # 获取主li下的ul的所有li标签，该li标签子是知识点
     child_len = len(child_ul_li)
     for j in range(child_len):
@@ -77,7 +80,9 @@ for i in range(root_len):
         first_child_level_id = child_li.label['bgid']  # 一级子知识点编号
         # f.write('1' + ' ' + first_child_level_id + ' ' +
         #         first_child_level_name + ' ' + '0' + ' ' + main_point_id + '\n')  # 写入一级子知识点
-        point_dict[main_point_id][first_child_level_id] = {'一级子知识点名称': first_child_level_name}
+        # point_dict[main_point_id][first_child_level_id] = {'一级子知识点名称': first_child_level_name}
+        point_dict[main_point][first_child_level_name] = {'一级子知识点编号': first_child_level_id}
+        point_dict[main_point][first_child_level_name]['权重'] = 0.0
         second_child_ul = child_li.ul  # 判断是否存在二级知识点
         if second_child_ul is not None:
             second_child_list = second_child_ul.find_all('li', recursive=False)  # 二级子知识点的list
@@ -88,10 +93,13 @@ for i in range(root_len):
                 second_child_id = second_child_list[k].label['bgid']
                 # f.write('2' + ' ' + second_child_id + ' ' +
                 #         second_child_name + ' ' + first_child_level_id + ' ' + main_point_id + '\n')
-                point_dict[main_point_id][first_child_level_id][second_child_id] = {'二级子知识点名称': second_child_name}
-
+                # point_dict[main_point_id][first_child_level_id][second_child_id] = {'二级子知识点名称': second_child_name}
+                point_dict[main_point][first_child_level_name][second_child_name] = {'二级子知识点编号': second_child_id}
+                point_dict[main_point][first_child_level_name][second_child_name]['权重'] = 0.0
+                num += 1
 point_json = json.dumps(point_dict)
 
-fj = open('point.json', 'w+')
+# print num  #  进过一次运算num的返回值是138
+fj = open('yitiku_points_name.json', 'w+')
 fj.write(point_json)
 fj.close()
