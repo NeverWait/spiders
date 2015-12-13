@@ -1,0 +1,193 @@
+b,urllib2,urllib3,os,time,gzip,tarfile,bs4,StringIO,grab,requests,lxml
+
+
+
+备注：
+
+1 requests文档：http://docs.python-requests.org/en/latest/user/advanced/#session-objects
+
+2 详细例子参看coding.net
+
+3 关于获得页面信息后如何保存有用的信息，可以使用beautifulsoup，参考官方文档，非常详细。
+
+
+
+二 使用urllib2和requests都可以，两者例子如下
+
+1 最简单的一种访问
+
+urllib2
+
+html = urllib2.urlopen(url)
+
+print html.read()  # 查看页面内容
+
+print html.code  # 状态码
+
+print html.info  # 报头信息
+
+
+
+requests
+
+r = requests.get(url)
+
+print r.status_code  # 状态码
+
+print r.content  # 页面信息
+
+
+
+2 伪装浏览器访问
+
+说明，对于有些网站比如http://blog.csdn.net/lxytsos/，直接使用爬虫访问时会返回403状态码，去看它的robots.txt会发现它禁止爬虫访问，这种情况需要伪装成浏览器访问，方法如下。
+
+header_info = {"User-Agent": 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0',
+
+               "Host": "blog.csdn.net",
+
+               "Referer": "http:/://blog.csdn.net/"
+
+               } 
+
+使用urllib2
+
+req = urllib2.Request("http://blog.csdn.net/lxytsos/", headers=header_info)
+
+content = urllib2.urlopen(req)
+
+content_read = content.read()
+
+
+
+使用requests
+
+session = requests.Session()
+
+res = session.get("http://blog.csdn.net/lxytsos/", headers=header_info)
+
+print res.status_code # 状态码
+
+print res.encoding # 编码信息
+
+print res.text # 页面信息
+
+
+
+3 对于需要登陆才能访问的情况
+
+使用urllib2模拟浏览器登陆
+
+account = '18229713118'
+
+pwd = '123456'
+
+chklogin = 'www.yitiku.cn'
+
+data = {'account': account, 'password': pwd, 'chklogin': 'www.yitiku.cn', 'remember': '1'}
+
+post_data = urllib.urlencode(data)
+
+cj = cookielib.CookieJar()
+
+opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
+headers = {
+
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:42.0) Gecko/20100101 Firefox/42.0',
+
+    'Host': 'blog.csdn.net',
+
+    'Referer': 'http:/://blog.csdn.net/'
+
+}
+
+website = 'http://www.yitiku.cn/'
+
+req = urllib2.Request(website, post_data, headers=headers)
+
+content = opener.open(req)
+
+print content.read()
+
+
+
+
+
+使用request2模拟登陆
+
+s = requests.session()
+
+#注意，下面的url和data各个网站的格式不一样，用firebug或者其他工具查看请求的url和参数来确定这两个值
+
+data = {'user':'用户名','passdw':'密码'}
+
+res=s.post(url, data)
+
+#然后get抓取的地址
+
+s.get('http://www.xxx.net/archives/155/')
+
+# 为了防止访问过多，可以编辑头部信息，具体见4
+
+s.get('http://www.xxx.net/archives/155/'，headers=header)
+
+
+
+
+
+三 可能出现的问题：
+
+1 获取的网页是乱码
+
+2 获取的网页是压缩后的数据
+
+3 需要登陆才能获取到内容
+
+4 访问被屏蔽或者禁止爬虫访问
+
+
+
+ 解决方法：
+
+1 获取的网页是乱码
+
+由于使用编码方法不一样，有的是utf-8有的是gbk，所以抓取的网页可能因为编码问题而出现乱码，
+
+一般情况下转为utf-8比较好，需求在程序页面顶部加上
+
+# -*- coding:utf-8 -*-
+
+import sys
+
+reload(sys)
+
+sys.setdefaultencoding("utf-8")
+
+
+
+配合decode()和encode()两个函数来和unicode转换
+
+
+
+2 获取的网页是压缩后的数据
+
+如果在编辑爬虫头部的时候加上'Accept-Encoding':'gzip',这样获取的页面是压缩后的数据
+
+解压方法见https://github.com/NeverWait/Gofoward/blob/master/progress/py_data_compress.txt第四节
+
+
+
+3 需要登陆才能获取到内容
+
+见二
+
+4 访问被屏蔽或者禁止爬虫访问
+
+见二
+
+
+
+
+
+四 还有一个比较重要的多线程抓取，后续补上。
