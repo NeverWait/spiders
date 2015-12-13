@@ -1,15 +1,9 @@
-b,urllib2,urllib3,os,time,gzip,tarfile,bs4,StringIO,grab,requests,lxml
+一可能用到的工具
 
-
-
+urllib, urllib2, urllib3, os, time, gzip, tarfile,  StringIO, grab, requests, lxml， beautifulsoup
 备注：
-
-1 requests文档：http://docs.python-requests.org/en/latest/user/advanced/#session-objects
-
-2 详细例子参看coding.net
-
-3 关于获得页面信息后如何保存有用的信息，可以使用beautifulsoup，参考官方文档，非常详细。
-
+fiddler是一个http调试代理工具，很有用
+grab是一个非常好的下载包，值得研究
 
 
 二 使用urllib2和requests都可以，两者例子如下
