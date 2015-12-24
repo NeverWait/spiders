@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD ["python","application.py"]
+CMD [""]
